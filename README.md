@@ -7,6 +7,18 @@ Cafe name, Cafe location, Cafe image, Cafe available seats, coffee prices and if
 ## Create Route and Endpoints
 So Now we need to focuse on which route we are gonna use and which endpoints we will provide to offer different services.
 For route will be a localhost for now `127.0.0.1:5000` as flask provide and the endpoints and it services will be as below:
-### 
+### HTTP GET - /get-api-token
+This end point will give a user a API Token that will allow the user to add cafe, update the coffee price and delete a cafe from a database.
+To get an API Token you need to send your choosen username  and your password as a json data stracture to the body request and we are going to use HTTP GET request as below:
+```py
+url = "http://127.0.0.1:5000/get-api-token"
 
+payload = "{
+            "username":"shalaby",
+            "password":12345678}"
+
+response = requests.request("GET", url, data=payload)
+
+print(response.text)
+```
 
