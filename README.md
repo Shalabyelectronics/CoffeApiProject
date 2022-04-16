@@ -18,7 +18,17 @@ payload = "{
             "password":12345678}"
 
 response = requests.request("GET", url, data=payload)
-
 print(response.text)
 ```
+and the user will get a an API Token as json to use it for the services that need an API token.
+```
+{
+    "created": {
+        "API TOKEN": "47e7e654a032567625b46b7ce8cef994"
+    }
+}
+```
+
+and to achive that we need to create how this service actually work from our server side and here our Flask web aoolication will deal with is as below:
+```py
 
