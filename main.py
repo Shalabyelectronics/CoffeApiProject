@@ -48,7 +48,7 @@ def home():
     return render_template("index.html")
 
 
-# HTTP POST/GET - API-TOKEN
+# HTTP GET - API-TOKEN
 @app.route("/get-api-token", methods=["GET"])
 def get_api_token():
     api_token = secrets.token_hex(16)
@@ -64,7 +64,8 @@ def get_api_token():
             db.session.add(new_user)
             db.session.commit()
             return jsonify(created={"API TOKEN": api_token})
-
+    else:
+        return jsonify(error={"Wrong request": "You need to use GET Request."})
 
 
 # HTTP GET - RANDOM CAFE
@@ -140,7 +141,8 @@ def update_price(cafe_id):
                         cafe.coffee_price = new_price
                         db.session.commit()
                         return jsonify(response={
-                            "success": "Successfully Coffee price updated for {} by {}.".format(cafe.name, user.username)})
+                            "success": "Successfully Coffee price updated for {} by {}.".format(cafe.name,
+                                                                                                user.username)})
                     else:
                         return jsonify(error={"No Price": "You seem forgot to add a coffee price."}), 404
                 else:
@@ -161,7 +163,8 @@ def delete_cafe(cafe_id=-1):
                 db.session.delete(cafe)
                 db.session.commit()
                 return jsonify(
-                    response={"success": "Successfully deleted {} from database by {} .".format(cafe.name, user.username)})
+                    response={
+                        "success": "Successfully deleted {} from database by {} .".format(cafe.name, user.username)})
             else:
                 return jsonify(error={"Not Found": "We can not found cafe with id {}.".format(cafe_id)}), 404
         else:
