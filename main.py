@@ -71,9 +71,12 @@ def get_api_token():
 # HTTP GET - RANDOM CAFE
 @app.route("/random", methods=["GET"])
 def random():
-    all_cafe = db.session.query(Cafe).all()
-    random_cafe = choice(all_cafe)
-    return jsonify(cafe={random_cafe.name: random_cafe.to_dict()})
+    if request.method == "GET":
+        all_cafe = db.session.query(Cafe).all()
+        random_cafe = choice(all_cafe)
+        return jsonify(cafe={random_cafe.name: random_cafe.to_dict()})
+    else:
+        return jsonify(error={"Wrong request": "You need to use GET Request."})
 
 
 # HTTP GET - Read Record
