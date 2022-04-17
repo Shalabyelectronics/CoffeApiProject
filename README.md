@@ -108,7 +108,7 @@ def search():
 ```
 ### HTTP POST - /add
 This end point will provide adding new cafe to the database and it reqiured an API token pass with the request headers as below:
-```json
+```py
 headers = {
   'x-api-key': 'ApiSecretKey'
 }
