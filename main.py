@@ -82,6 +82,8 @@ def all_cafes():
     if request.method == "GET":
         cafes = db.session.query(Cafe).all()
         return jsonify(all_cafes=[cafe.to_dict() for cafe in cafes])
+    else:
+        return jsonify(error={"Wrong request": "You need to use GET Request."})
 
 
 # HTTP GET - SEARCH RECORD
