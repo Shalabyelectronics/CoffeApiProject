@@ -106,3 +106,10 @@ def search():
             results) and limit != 0 else jsonify(
             error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."}), 404
 ```
+### HTTP POST - /add
+This end point will provide adding new cafe to the database and it reqiured an API token pass with the request headers as below:
+```json
+headers = {
+  'x-api-key': 'ApiSecretKey'
+}
+```
