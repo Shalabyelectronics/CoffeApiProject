@@ -61,3 +61,4 @@ class User(db.Model):
     password = db.Column(db.String(250), nullable=False)
     api_token = db.Column(db.String(250), unique=True, nullable=False)
 ```
+So when the user send and GET request with his username and password the user API token will be generated and be save in a database as well, finally the user will get his response that include the Token.
