@@ -49,4 +49,15 @@ def get_api_token():
      else:
          return jsonify(error={"Wrong request": "You need to use GET Request."})
 ```
-
+To explain this route function we need to take it as three blocks:
+first block generated an API Token and it seems like that but it actually about generate a key to give a user more abilities.
+And to generate this key I used secrets pre-loaded library to generate a hex token that have 16 bits.
+Then we need to store the user data and his API token in a database so I created one as below:
+```py
+# User TABLE Registration
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(250), unique=True, nullable=False)
+    password = db.Column(db.String(250), nullable=False)
+    api_token = db.Column(db.String(250), unique=True, nullable=False)
+```
