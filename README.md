@@ -29,6 +29,24 @@ and the user will get a an API Token as json to use it for the services that nee
 }
 ```
 
-and to achive that we need to create how this service actually work from our server side and here our Flask web aoolication will deal with is as below:
+and to achive that we need to create how this service actually work from our server side and here our Flask web application will deal with is as below:
 ```py
+@app.route("/get-api-token", methods=["GET"])
+def get_api_token():
+    api_token = secrets.token_hex(16)
+    if request.method == "GET":
+        data = request.get_json()
+        users_name = db.session.query(User).filter_by(username=data.get("username")).first()
+        if users_name:
+            return jsonify(created={"API TOKEN": users_name.api_token})
+        else:
+            new_user = User(username=data.get("username"),
+                            password=data.get("password"),
+                            api_token=api_token)
+            db.session.add(new_user)
+            db.session.commit()
+            return jsonify(created={"API TOKEN": api_token})
+     else:
+         return jsonify(error={"Wrong request": "You need to use GET Request."})
+```
 
