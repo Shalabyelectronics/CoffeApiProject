@@ -29,6 +29,38 @@ and the user will get a an API Token as json to use it for the services that nee
 }
 ```
 
-and to achive that we need to create how this service actually work from our server side and here our Flask web aoolication will deal with is as below:
+and to achive that we need to create how this service actually work from our server side and here our Flask web application will deal with is as below:
 ```py
+@app.route("/get-api-token", methods=["GET"])
+def get_api_token():
+    api_token = secrets.token_hex(16)
+    if request.method == "GET":
+        data = request.get_json()
+        users_name = db.session.query(User).filter_by(username=data.get("username")).first()
+        if users_name:
+            return jsonify(created={"API TOKEN": users_name.api_token})
+        else:
+            new_user = User(username=data.get("username"),
+                            password=data.get("password"),
+                            api_token=api_token)
+            db.session.add(new_user)
+            db.session.commit()
+            return jsonify(created={"API TOKEN": api_token})
+     else:
+         return jsonify(error={"Wrong request": "You need to use GET Request."})
+```
+To explain this route function we need to take it as three blocks:
+first block generated an API Token and it seems like that but it actually about generate a key to give a user more abilities.
+And to generate this key I used secrets pre-loaded library to generate a hex token that have 16 bits.
+Then we need to store the user data and his API token in a database so I created one as below:
+```py
+# User TABLE Registration
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(250), unique=True, nullable=False)
+    password = db.Column(db.String(250), nullable=False)
+    api_token = db.Column(db.String(250), unique=True, nullable=False)
+```
+So when the user send and GET request with his username and password the user API token will be generated and be save in a database as well, finally the user will get his response that include the Token.
+![api token](https://user-images.githubusercontent.com/57592040/163731763-c654c833-ecbf-4ac0-93f4-9bc88b703e18.gif)
 
