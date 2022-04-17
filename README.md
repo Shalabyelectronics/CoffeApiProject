@@ -68,7 +68,7 @@ So when the user send and GET request with his username and password the user AP
 
 As you see I use POSTman tool to test my API and create an API Documentation .
 ### HTTP GET - /all
-This endpoint will Read records and view it as a json structure you don't need a token for this service. 
+This endpoint will Read records and view all cafes available as a json structure you don't need a token for this service. 
 And I create this service on flask as below:
 ```py
 @app.route("/all", methods=["GET"])
@@ -78,4 +78,31 @@ def all_cafes():
         return jsonify(all_cafes=[cafe.to_dict() for cafe in cafes])
     else:
         return jsonify(error={"Wrong request": "You need to use GET Request."})
+```
+### HTTP GET- /random
+This endpoint will provide a random cafe service and the service code and it is not requared an API Token will be like this :
+```py
+@app.route("/random", methods=["GET"])
+def random():
+    if request.method == "GET":
+        all_cafe = db.session.query(Cafe).all()
+        random_cafe = choice(all_cafe)
+        return jsonify(cafe={random_cafe.name: random_cafe.to_dict()})
+    else:
+        return jsonify(error={"Method Not Allowed": "The method is not allowed for the requested URL."}), 405
+```
+## HTTP GET - /search
+This end point will provide a search about a cafe by it's location and you can limit your search results as well.
+An example of the request `/search?loc=Peckham&limit=1` and the code of this service will look like this:
+```py
+@app.route("/search", methods=["GET"])
+def search():
+    if request.method == "GET":
+        loc = request.args.get("loc")
+        results = db.session.query(Cafe).filter(Cafe.location == loc).all()
+        limit = int(request.args.get("limit")) if request.args.get("limit") is not None else len(results)
+        results = db.session.query(Cafe).filter(Cafe.location == loc).all()
+        return jsonify(results=[result.to_dict() for result in results[:limit]]) if len(
+            results) and limit != 0 else jsonify(
+            error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."}), 404
 ```
