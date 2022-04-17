@@ -1,5 +1,7 @@
 # CoffeApiProject
-This project is about practicing creating your RESTFUL API by using Flask Frameware and POSTman tool.
+This project is about practicing creating your RESTFUL API by using Flask Frameware and POSTman tool to create our API Documentation.
+![overview](https://user-images.githubusercontent.com/57592040/163733886-8f4ca1ce-43d0-4bf9-b300-63bb73995329.gif)
+
 ## Designing your API Servecies
 When you start thinking about building your own RESTful API you need to know what services you are going to provide throw it to the end user.
 So with this practice we are going to build a Cafes informations providers API that mean we are going to create a cafes database to collects cafes data as below:
@@ -64,3 +66,16 @@ class User(db.Model):
 So when the user send and GET request with his username and password the user API token will be generated and be save in a database as well, finally the user will get his response that include the Token.
 ![api token](https://user-images.githubusercontent.com/57592040/163731763-c654c833-ecbf-4ac0-93f4-9bc88b703e18.gif)
 
+As you see I use POSTman tool to test my API and create an API Documentation .
+### HTTP GET - /all
+This endpoint will Read records and view it as a json structure you don't need a token for this service. 
+And I create this service on flask as below:
+```py
+@app.route("/all", methods=["GET"])
+def all_cafes():
+    if request.method == "GET":
+        cafes = db.session.query(Cafe).all()
+        return jsonify(all_cafes=[cafe.to_dict() for cafe in cafes])
+    else:
+        return jsonify(error={"Wrong request": "You need to use GET Request."})
+```
