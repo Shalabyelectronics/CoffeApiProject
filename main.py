@@ -76,17 +76,17 @@ def random():
         random_cafe = choice(all_cafe)
         return jsonify(cafe={random_cafe.name: random_cafe.to_dict()})
     else:
-        return jsonify(error={"Wrong request": "You need to use GET Request."})
+        return jsonify(error={"Method Not Allowed": "The method is not allowed for the requested URL."}), 405
 
 
 # HTTP GET - Read Record
-@app.route("/all", methods=["GET"])
+@app.route("/all", methods=["GET", "POST"])
 def all_cafes():
     if request.method == "GET":
         cafes = db.session.query(Cafe).all()
         return jsonify(all_cafes=[cafe.to_dict() for cafe in cafes])
     else:
-        return jsonify(error={"Wrong request": "You need to use GET Request."})
+        return jsonify(error={"Method Not Allowed": "The method is not allowed for the requested URL."}), 405
 
 
 # HTTP GET - SEARCH RECORD
@@ -99,7 +99,7 @@ def search():
         results = db.session.query(Cafe).filter(Cafe.location == loc).all()
         return jsonify(results=[result.to_dict() for result in results[:limit]]) if len(
             results) and limit != 0 else jsonify(
-            error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."})
+            error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."}), 404
 
 
 # HTTP POST - Create Record
@@ -125,17 +125,19 @@ def add():
             db.session.commit()
             return jsonify(response={"success": "Successfully new cafe added by {} .".format(user.username)})
         else:
-            return jsonify(error={"Not Allowed": "Your Api key is not allowed."}), 401
+            return jsonify(error={"Not Allowed": "You need an Api key for this service."}), 401
 
 
 # HTTP PUT/PATCH - Update Record
-@app.route("/update-price/<cafe_id>", methods=["PATCH"])
-def update_price(cafe_id):
+@app.route("/update-price", methods=["PATCH"])
+def update_price():
+    body_data = request.get_json()
+    cafe_id = body_data["cafe_id"]
     if request.method == "PATCH":
         user_api_token = request.headers.get("x-api-key")
         user = db.session.query(User).filter(User.api_token == user_api_token).first()
         if user:
-            new_price = request.args.get("new-price")
+            new_price = body_data["new-price"]
             cafe = db.session.query(Cafe).get(cafe_id)
             if request.method == "POST":
                 if cafe and new_price:
