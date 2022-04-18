@@ -1,8 +1,11 @@
-# CoffeApiProject
-This project is about practicing creating your RESTFUL API by using Flask Frameware and POSTman tool to create our API Documentation.
-![overview](https://user-images.githubusercontent.com/57592040/163733886-8f4ca1ce-43d0-4bf9-b300-63bb73995329.gif)
+# Cafe RESTful api practice project
+This project is about practicing creating your RESTFUL API by using Flask Framework and POSTman tool to create our API Documentation.
 
-## Designing your API Servecies
+![final results](https://user-images.githubusercontent.com/57592040/163868468-521ee21f-a357-4aad-b3f6-930d823ab10c.gif)
+
+
+## Designing your RESTful API
+REST mean **Representational State Transfer**
 When you start thinking about building your own RESTful API you need to know what services you are going to provide throw it to the end user.
 So with this practice we are going to build a Cafes informations providers API that mean we are going to create a cafes database to collects cafes data as below:
 Cafe name, Cafe location, Cafe image, Cafe available seats, coffee prices and if it have toliet, wifi, sockets, and can take calls.
@@ -169,3 +172,65 @@ def add():
 As you can see we are going to get the API token from the headers then check if that token are already exist in our User database if so we can continue, 
 and here we will use a POSTman tool to create a form as below:
 ![add form](https://user-images.githubusercontent.com/57592040/163737242-b24f8759-2706-42f7-a31d-0f77ccde4b13.jpg)
+
+### HTTP PATCH - /update-price
+This end point will provide you update coffee price by cafe id service and this service required Token as well and the end point code will be as below:
+```py
+# HTTP PUT/PATCH - Update Record
+@app.route("/update-price", methods=["PATCH"])
+def update_price():
+    body_data = request.get_json()
+    cafe_id = body_data["cafe_id"]
+    if request.method == "PATCH":
+        user_api_token = request.headers.get("x-api-key")
+        user = db.session.query(User).filter(User.api_token == user_api_token).first()
+        if user:
+            new_price = body_data["new-price"]
+            cafe = db.session.query(Cafe).get(cafe_id)
+            if request.method == "POST":
+                if cafe and new_price:
+                    return redirect(url_for("update_price", cafe_id=cafe_id))
+            else:
+                if cafe:
+                    if new_price:
+                        cafe.coffee_price = new_price
+                        db.session.commit()
+                        return jsonify(response={
+                            "success": "Successfully Coffee price updated for {} by {}.".format(cafe.name,
+                                                                                                user.username)})
+                    else:
+                        return jsonify(error={"No Price": "You seem forgot to add a coffee price."}), 404
+                else:
+                    return jsonify(error={"Not Found": "We can not found cafe with id {}.".format(cafe_id)}), 404
+        else:
+            return jsonify(error={"Not Allowed": "Your Api key is not allowed."}), 401
+```
+### HTTP DELETE - /report-closed
+This end point will delete a record lets say one of cafes where closed so we need to remove it from our database and to do so we can send a delete request method with a cafe id in a body and api token to the headers as well and our end point code will be as below:
+```py
+@app.route("/report-closed", methods=["DELETE"])
+def delete_cafe():
+    cafe_id = request.get_json()["cafe_id"]
+    if request.method == "DELETE":
+        cafe = db.session.query(Cafe).get(cafe_id)
+        user_api_token = request.headers.get("x-api-key")
+        user = db.session.query(User).filter(User.api_token == user_api_token).first()
+        if user:
+            if cafe:
+                db.session.delete(cafe)
+                db.session.commit()
+                return jsonify(
+                    response={
+                        "success": "Successfully deleted {} from database by {} .".format(cafe.name, user.username)})
+            else:
+                return jsonify(error={"Not Found": "We can not found cafe with id {}.".format(cafe_id)}), 404
+        else:
+            return jsonify(error={"Not Allowed": "Your Api key is not allowed."}), 401
+```
+### Test and create a documentation for your RESTful API by POSTman 
+Postman is a very powerful tool that will help you to test and generate a documentation for your api
+you can check the documentation for this api from [here](https://documenter.getpostman.com/view/20354007/UVyysYEK)
+and to know more about using this great tool check this tutorial [Postman Beginner's Course - API Testing](https://youtu.be/VywxIQ2ZXw4)
+
+### Resources 
+This practice is part of [100 Days of Code: The Complete Python Pro Bootcamp for 2022 by Dr.Angela Yu](https://www.udemy.com/course/100-days-of-code/)
