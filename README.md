@@ -202,3 +202,28 @@ def update_price():
         else:
             return jsonify(error={"Not Allowed": "Your Api key is not allowed."}), 401
 ```
+### HTTP DELETE - /report-closed
+This end point will delete a record lets say one of cafes where closed so we need to remove it from our database and to do so we can send a delete request method with a cafe id in a body and api token to the headers as well and our end point code will be as below:
+```py
+@app.route("/report-closed", methods=["DELETE"])
+def delete_cafe():
+    cafe_id = request.get_json()["cafe_id"]
+    if request.method == "DELETE":
+        cafe = db.session.query(Cafe).get(cafe_id)
+        user_api_token = request.headers.get("x-api-key")
+        user = db.session.query(User).filter(User.api_token == user_api_token).first()
+        if user:
+            if cafe:
+                db.session.delete(cafe)
+                db.session.commit()
+                return jsonify(
+                    response={
+                        "success": "Successfully deleted {} from database by {} .".format(cafe.name, user.username)})
+            else:
+                return jsonify(error={"Not Found": "We can not found cafe with id {}.".format(cafe_id)}), 404
+        else:
+            return jsonify(error={"Not Allowed": "Your Api key is not allowed."}), 401
+```
+### Test and create a documentation for your RESTful API by POSTman 
+Postman is a very powerful tool that will help you to test and generate a documentation for your api
+you can check the documentation for this api from [here](https://documenter.getpostman.com/view/20354007/UVyysYEK)
