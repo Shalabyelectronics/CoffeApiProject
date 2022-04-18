@@ -93,12 +93,13 @@ def all_cafes():
 @app.route("/search", methods=["GET"])
 def search():
     if request.method == "GET":
-        loc = request.args.get("loc")
-        results = db.session.query(Cafe).filter(Cafe.location == loc).all()
-        limit = int(request.args.get("limit")) if request.args.get("limit") is not None else len(results)
-        results = db.session.query(Cafe).filter(Cafe.location == loc).all()
+        body_data = request.get_json()
+        location = body_data["location"]
+        results = db.session.query(Cafe).filter(Cafe.location == location).all()
+        limit = body_data.get("limit") if body_data.get("limit") is not None else len(results)
+        results = db.session.query(Cafe).filter(Cafe.location == location).all()
         return jsonify(results=[result.to_dict() for result in results[:limit]]) if len(
-            results) and limit != 0 else jsonify(
+            results) else jsonify(
             error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."}), 404
 
 
