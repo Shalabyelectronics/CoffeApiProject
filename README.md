@@ -140,3 +140,32 @@ class Cafe(db.Model):
         '''
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 ```
+After creating and activate our database by `db.create_all()` and you have to know that `db` is an instance from `SQLAlchemy(app)` that we have to created before, After that we need to create our service that will add a new record to our database and we can do that throw the code below:
+```py
+@app.route("/add", methods=["POST"])
+def add():
+    if request.method == "POST":
+        user_api_token = request.headers.get("x-api-key")
+        user = db.session.query(User).filter(User.api_token == user_api_token).first()
+        if user:
+            form_data = request.form.to_dict()
+
+            def add_data(data):
+                for key, value in data.items():
+                    if value.title() == "True":
+                        data[key] = True
+                    elif value.title() == "False":
+                        data[key] = False
+                return data
+
+            data = add_data(form_data)
+            cafe = Cafe(**data)
+            db.session.add(cafe)
+            db.session.commit()
+            return jsonify(response={"success": "Successfully new cafe added by {} .".format(user.username)})
+        else:
+            return jsonify(error={"Not Allowed": "You need an Api key for this service."}), 401
+```
+As you can see we are going to get the API token from the headers then check if that token are already exist in our User database if so we can continue, 
+and here we will use a POSTman tool to create a form as below:
+![add form](https://user-images.githubusercontent.com/57592040/163737242-b24f8759-2706-42f7-a31d-0f77ccde4b13.jpg)
