@@ -68,7 +68,7 @@ So when the user send and GET request with his username and password the user AP
 
 As you see I use POSTman tool to test my API and create an API Documentation .
 ### HTTP GET - /all
-This endpoint will Read records and view it as a json structure you don't need a token for this service. 
+This endpoint will Read records and view all cafes available as a json structure you don't need a token for this service. 
 And I create this service on flask as below:
 ```py
 @app.route("/all", methods=["GET"])
@@ -79,3 +79,93 @@ def all_cafes():
     else:
         return jsonify(error={"Wrong request": "You need to use GET Request."})
 ```
+### HTTP GET- /random
+This endpoint will provide a random cafe service and the service code and it is not requared an API Token will be like this :
+```py
+@app.route("/random", methods=["GET"])
+def random():
+    if request.method == "GET":
+        all_cafe = db.session.query(Cafe).all()
+        random_cafe = choice(all_cafe)
+        return jsonify(cafe={random_cafe.name: random_cafe.to_dict()})
+    else:
+        return jsonify(error={"Method Not Allowed": "The method is not allowed for the requested URL."}), 405
+```
+## HTTP GET - /search
+This end point will provide a search about a cafe by it's location and you can limit your search results as well.
+An example of the request `/search?loc=Peckham&limit=1` and the code of this service will look like this:
+```py
+@app.route("/search", methods=["GET"])
+def search():
+    if request.method == "GET":
+        loc = request.args.get("loc")
+        results = db.session.query(Cafe).filter(Cafe.location == loc).all()
+        limit = int(request.args.get("limit")) if request.args.get("limit") is not None else len(results)
+        results = db.session.query(Cafe).filter(Cafe.location == loc).all()
+        return jsonify(results=[result.to_dict() for result in results[:limit]]) if len(
+            results) and limit != 0 else jsonify(
+            error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."}), 404
+```
+### HTTP POST - /add
+This end point will provide adding new cafe to the database and it reqiured an API token pass with the request headers as below:
+```py
+headers = {
+  'x-api-key': 'ApiSecretKey'
+}
+```
+And We need to create a Cafe database Model as below:
+```py
+# Cafe TABLE Configuration
+class Cafe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250), unique=True, nullable=False)
+    map_url = db.Column(db.String(500), nullable=False)
+    img_url = db.Column(db.String(500), nullable=False)
+    location = db.Column(db.String(250), nullable=False)
+    seats = db.Column(db.String(250), nullable=False)
+    has_toilet = db.Column(db.Boolean, nullable=False)
+    has_wifi = db.Column(db.Boolean, nullable=False)
+    has_sockets = db.Column(db.Boolean, nullable=False)
+    can_take_calls = db.Column(db.Boolean, nullable=False)
+    coffee_price = db.Column(db.String(250), nullable=True)
+
+    def to_dict(self):
+        dictionary = {}
+        '''
+        You have two ways to achive this first by writing it line by line or by using dictionary comprehension.
+        # for column in self.__table__.columns:
+        #     dictionary[column.name] = getattr(self, column.name)
+        # return dictionary
+        # Or we can use Dictionary comprehension
+        '''
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+```
+After creating and activate our database by `db.create_all()` and you have to know that `db` is an instance from `SQLAlchemy(app)` that we have to created before, After that we need to create our service that will add a new record to our database and we can do that throw the code below:
+```py
+@app.route("/add", methods=["POST"])
+def add():
+    if request.method == "POST":
+        user_api_token = request.headers.get("x-api-key")
+        user = db.session.query(User).filter(User.api_token == user_api_token).first()
+        if user:
+            form_data = request.form.to_dict()
+
+            def add_data(data):
+                for key, value in data.items():
+                    if value.title() == "True":
+                        data[key] = True
+                    elif value.title() == "False":
+                        data[key] = False
+                return data
+
+            data = add_data(form_data)
+            cafe = Cafe(**data)
+            db.session.add(cafe)
+            db.session.commit()
+            return jsonify(response={"success": "Successfully new cafe added by {} .".format(user.username)})
+        else:
+            return jsonify(error={"Not Allowed": "You need an Api key for this service."}), 401
+```
+As you can see we are going to get the API token from the headers then check if that token are already exist in our User database if so we can continue, 
+and here we will use a POSTman tool to create a form as below:
+![add form](https://user-images.githubusercontent.com/57592040/163737242-b24f8759-2706-42f7-a31d-0f77ccde4b13.jpg)
