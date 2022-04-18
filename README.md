@@ -169,3 +169,36 @@ def add():
 As you can see we are going to get the API token from the headers then check if that token are already exist in our User database if so we can continue, 
 and here we will use a POSTman tool to create a form as below:
 ![add form](https://user-images.githubusercontent.com/57592040/163737242-b24f8759-2706-42f7-a31d-0f77ccde4b13.jpg)
+
+### HTTP PATCH - /update-price
+This end point will provide you update coffee price by cafe id service and this service required Token as well and the end point code will be as below:
+```py
+# HTTP PUT/PATCH - Update Record
+@app.route("/update-price", methods=["PATCH"])
+def update_price():
+    body_data = request.get_json()
+    cafe_id = body_data["cafe_id"]
+    if request.method == "PATCH":
+        user_api_token = request.headers.get("x-api-key")
+        user = db.session.query(User).filter(User.api_token == user_api_token).first()
+        if user:
+            new_price = body_data["new-price"]
+            cafe = db.session.query(Cafe).get(cafe_id)
+            if request.method == "POST":
+                if cafe and new_price:
+                    return redirect(url_for("update_price", cafe_id=cafe_id))
+            else:
+                if cafe:
+                    if new_price:
+                        cafe.coffee_price = new_price
+                        db.session.commit()
+                        return jsonify(response={
+                            "success": "Successfully Coffee price updated for {} by {}.".format(cafe.name,
+                                                                                                user.username)})
+                    else:
+                        return jsonify(error={"No Price": "You seem forgot to add a coffee price."}), 404
+                else:
+                    return jsonify(error={"Not Found": "We can not found cafe with id {}.".format(cafe_id)}), 404
+        else:
+            return jsonify(error={"Not Allowed": "Your Api key is not allowed."}), 401
+```
