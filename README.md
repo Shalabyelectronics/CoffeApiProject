@@ -3,7 +3,7 @@ This project is about practicing creating your RESTFUL API by using Flask Framew
 
 ![overview](https://user-images.githubusercontent.com/57592040/163733886-8f4ca1ce-43d0-4bf9-b300-63bb73995329.gif)
 
-## Designing your RESTFUL API
+## Designing your RESTful API
 REST mean **Representational State Transfer**
 When you start thinking about building your own RESTful API you need to know what services you are going to provide throw it to the end user.
 So with this practice we are going to build a Cafes informations providers API that mean we are going to create a cafes database to collects cafes data as below:
