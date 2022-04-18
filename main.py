@@ -109,17 +109,23 @@ def add():
         user_api_token = request.headers.get("x-api-key")
         user = db.session.query(User).filter(User.api_token == user_api_token).first()
         if user:
-            form_data = request.form.to_dict()
+            body_data = request.get_json()
 
-            def add_data(data):
+            def add_data(data:dict) -> dict:
+                """
+                This function will take a body data and check where we have a boolean data type and convert it to
+                valid boolean type.
+                :param data:
+                :return:
+                """
                 for key, value in data.items():
-                    if value.title() == "True":
+                    if value == "true":
                         data[key] = True
-                    elif value.title() == "False":
+                    elif value == "false":
                         data[key] = False
                 return data
 
-            data = add_data(form_data)
+            data = add_data(body_data)
             cafe = Cafe(**data)
             db.session.add(cafe)
             db.session.commit()
