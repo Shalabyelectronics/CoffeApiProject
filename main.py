@@ -65,7 +65,7 @@ def get_api_token():
             db.session.commit()
             return jsonify(created={"API TOKEN": api_token})
     else:
-        return jsonify(error={"Wrong request": "You need to use GET Request."})
+        return jsonify(error={"Wrong request": "You need to use GET Request."}), 404
 
 
 # HTTP GET - RANDOM CAFE
@@ -98,9 +98,10 @@ def search():
         results = db.session.query(Cafe).filter(Cafe.location == location).all()
         limit = body_data.get("limit") if body_data.get("limit") is not None else len(results)
         results = db.session.query(Cafe).filter(Cafe.location == location).all()
-        return jsonify(results=[result.to_dict() for result in results[:limit]]) if len(
-            results) else jsonify(
-            error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."}), 404
+        if len(results):
+            return jsonify(results=[result.to_dict() for result in results[:limit]]), 200
+        else:
+            return jsonify(error={"Not found": "We did not have a cafe in  this location or you can not use a zero limit."}), 404
 
 
 # HTTP POST - Create Record
