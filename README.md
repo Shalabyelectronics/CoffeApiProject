@@ -227,3 +227,7 @@ def delete_cafe():
 ### Test and create a documentation for your RESTful API by POSTman 
 Postman is a very powerful tool that will help you to test and generate a documentation for your api
 you can check the documentation for this api from [here](https://documenter.getpostman.com/view/20354007/UVyysYEK)
+and to know more about using this great tool check this tutorial [Postman Beginner's Course - API Testing](https://youtu.be/VywxIQ2ZXw4)
+
+### Resources 
+This practice is part of [100 Days of Code: The Complete Python Pro Bootcamp for 2022 by Dr.Angela Yu](https://www.udemy.com/course/100-days-of-code/)
